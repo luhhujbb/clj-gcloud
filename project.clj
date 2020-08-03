@@ -7,4 +7,5 @@
                  [com.google.cloud/google-cloud-core "1.91.3"]
                  [com.google.cloud/google-cloud-core-http "1.91.3"]
                  [com.google.cloud/google-cloud-compute "0.118.0-alpha"]
-                 [org.clojure/tools.logging "0.5.0"]])
+                 [org.clojure/tools.logging "0.5.0"]
+                 [cheshire "5.9.0"]])
