@@ -28,6 +28,6 @@
                                           credential)
           builder (Compute$Builder. http-transport json-factory credential)
           builder (if (:application-name options)
-                    (.setApplicationName (:application-name options))
+                    (.setApplicationName builder (:application-name options))
                     builder)]
       (.build builder)))
