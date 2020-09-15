@@ -1,25 +1,20 @@
 (ns clj-gcloud.compute.core
   (:require [clojure.tools.logging :as log]
-            [clojure.java.io :as io])
-    (:import [com.google.api.services.compute Compute Compute$Builder Compute$Instances Compute$Instances$List]
-             [com.google.api.services.compute.model Instance InstanceList]
+            [clj-gcloud.common.core :as common])
+    (:import [com.google.api.services.compute Compute Compute$Builder]
+             [com.google.api.services.sql SQLAdmin SQLAdmin$Builder]
              [com.google.api.client.googleapis.auth.oauth2 GoogleCredential]
-             [com.google.api.client.googleapis.javanet GoogleNetHttpTransport]
              [com.google.api.client.http HttpTransport]
              [com.google.api.client.json JsonFactory]
              [com.google.api.client.json.jackson2 JacksonFactory]
              [java.util Arrays]))
 
-(defn mk-credentials
-   [json-path]
-   (GoogleCredential/fromStream (io/input-stream json-path)))
-
 (defn ^Compute init
   [options]
     ^Compute
-    (let [^HttpTransport http-transport (GoogleNetHttpTransport/newTrustedTransport)
-          ^JsonFactory json-factory (JacksonFactory/getDefaultInstance)
-          ^GoogleCredential credential (mk-credentials (:json-path options))
+    (let [^HttpTransport http-transport (common/http-transport)
+          ^JsonFactory json-factory (common/jackson-default-factory)
+          ^GoogleCredential credential (common/mk-credentials (:json-path options))
           ^GoogleCredential credential (if (.createScopedRequired credential)
                                           (.createScoped
                                             credential
