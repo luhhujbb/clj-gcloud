@@ -1,8 +1,10 @@
 (ns clj-gcloud.sql.sql-admin
   (:require [clojure.tools.logging :as log]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [clj-gcloud.common.core :as common])
     (:import [com.google.api.services.sql
                 SQLAdmin
+                SQLAdmin$Builder
                 SQLAdmin$Instances
                 SQLAdmin$Instances$List
                 SQLAdmin$Instances$Get]
@@ -11,6 +13,11 @@
                 DatabaseInstance]
              [java.util Arrays Map]))
 
+
+(defn ^SQLAdmin init
+   [options]
+   ^SQLAdmin
+   (common/build-service SQLAdmin$Builder options))
 
 (defn list
      [^SQLAdmin client project & [next-page-token]]

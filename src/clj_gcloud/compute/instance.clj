@@ -1,8 +1,10 @@
 (ns clj-gcloud.compute.instance
   (:require [clojure.tools.logging :as log]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [clj-gcloud.common.core :as common])
     (:import [com.google.api.services.compute
                 Compute
+                Compute$Builder
                 Compute$Instances
                 Compute$Instances$List
                 Compute$Instances$Get]
@@ -11,6 +13,13 @@
                 InstanceList
                 InstancesSetLabelsRequest]
              [java.util Arrays Map]))
+
+ (defn ^Compute init
+   [options]
+     ^Compute
+     (common/build-service
+      Compute$Builder
+      (assoc options :scope ["https://www.googleapis.com/auth/cloud-platform"])))
 
 (defn list
     [^Compute client project zone & [next-page-token]]
