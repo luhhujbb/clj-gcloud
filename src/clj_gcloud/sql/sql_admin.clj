@@ -17,7 +17,10 @@
 (defn ^SQLAdmin init
    [options]
    ^SQLAdmin
-   (common/build-service SQLAdmin$Builder options))
+   (common/build-service SQLAdmin$Builder
+     (if-not (:scope options)
+      (assoc options :scope ["https://www.googleapis.com/auth/sqlservice.admin"])
+      options)))
 
 (defn list
      [^SQLAdmin client project & [next-page-token]]
@@ -26,7 +29,9 @@
                                              (.setPageToken request next-page-token)
                                              request)
            ^InstancesListResponse response (.execute request)]
-           {:items (json/parse-string (.toString (.getItems response)) true)
+           {:items (if-let [items (.getItems response)]
+                      (json/parse-string (.toString items) true)
+                      [])
             :next-page-token (.getNextPageToken response)}))
 
 (defn list-all

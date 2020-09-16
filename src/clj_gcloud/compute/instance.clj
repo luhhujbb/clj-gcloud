@@ -19,7 +19,9 @@
      ^Compute
      (common/build-service
       Compute$Builder
-      (assoc options :scope ["https://www.googleapis.com/auth/cloud-platform"])))
+      (if-not (:scope options)
+       (assoc options :scope ["https://www.googleapis.com/auth/cloud-platform"])
+       options)))
 
 (defn list
     [^Compute client project zone & [next-page-token]]
@@ -28,7 +30,9 @@
                                             (.setPageToken request next-page-token)
                                             request)
           ^InstanceList response (.execute request)]
-          {:items (json/parse-string (.toString (.getItems response)) true)
+          {:items (if-let [items (.getItems response)]
+                     (json/parse-string (.toString items) true)
+                     [])
            :next-page-token (.getNextPageToken response)}))
 
 (defn list-all
