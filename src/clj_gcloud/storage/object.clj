@@ -18,12 +18,34 @@
              [java.util Arrays]))
 
 
+(defn mk-storage-object
+  [bucket key]
+  ^StorageObject (-> (StorageObject.)
+    (.setBucket bucket)
+    (.setName key)))
+
 ;;objects
 (defn put-file
- [client bucket key file-path & [metadata]])
+ [client bucket key file-path & [opts]]
+ (.execute
+   (.insert
+     (.objects client)
+     bucket
+     (mk-storage-object bucket client))
+     (FileContent. (:content-type opts) (io/file file-path))))
+
+(defn put-bytes
+  [client bucket key content-bytes & [opts]]
+  (.execute
+    (.insert
+      (.objects client)
+      bucket
+      (mk-storage-object bucket client))
+      (ByteArrayContent. (:content-type opts) content-bytes)))
 
 (defn put-string
- [client bucket key content-string & [metadata]])
+  [client bucket key content-string & [opts]]
+  (put-bytes bucket key (.getBytes content-string) opts))
 
 (defn put
  [client bucket key input-stream & [metadata]])
