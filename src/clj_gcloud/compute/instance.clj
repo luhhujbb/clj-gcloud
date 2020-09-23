@@ -24,10 +24,10 @@
        options)))
 
 (defn list
-    [^Compute client project zone & [next-page-token]]
+    [^Compute client project zone & [args]]
     (let [^Compute$Instances$List request (.list (.instances client) project zone)
-          ^Compute$Instances$List request (if (some? next-page-token)
-                                            (.setPageToken request next-page-token)
+          ^Compute$Instances$List request (if (some? (:next-page-token args))
+                                            (.setPageToken request (:next-page-token args))
                                             request)
           ^InstanceList response (.execute request)]
           {:items (if-let [items (.getItems response)]
@@ -43,7 +43,7 @@
              (if (some? (:next-page-token response))
                 (recur
                   (into [] (concat instances-list (:items response)))
-                  (list client project zone (:next-page-token response)))
+                  (list client project zone {:next-page-token (:next-page-token response)}))
                 (into [] (concat instances-list (:items response)))))))
 
 (defn get

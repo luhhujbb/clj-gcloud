@@ -23,10 +23,10 @@
       options)))
 
 (defn list
-     [^SQLAdmin client project & [next-page-token]]
+     [^SQLAdmin client project & [args]]
      (let [^SQLAdmin$Instances$List request (.list (.instances client) project)
-           ^SQLAdmin$Instances$List request (if (some? next-page-token)
-                                             (.setPageToken request next-page-token)
+           ^SQLAdmin$Instances$List request (if (some? (:next-page-token args))
+                                             (.setPageToken request (:next-page-token args))
                                              request)
            ^InstancesListResponse response (.execute request)]
            {:items (if-let [items (.getItems response)]
@@ -42,7 +42,7 @@
               (if (some? (:next-page-token response))
                  (recur
                    (into [] (concat instances-list (:items response)))
-                   (list client project (:next-page-token response)))
+                   (list client project {:next-page-token (:next-page-token response)}))
                  (into [] (concat instances-list (:items response)))))))
 
  (defn restart

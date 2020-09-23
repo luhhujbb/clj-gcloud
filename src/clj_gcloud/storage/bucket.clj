@@ -6,7 +6,8 @@
             [clj-gcloud.storage.core :refer [init]])
     (:import [com.google.api.services.storage
                 Storage
-                Storage$Buckets]
+                Storage$Buckets
+                Storage$Buckets$List]
              [com.google.api.services.storage.model
                 Bucket
                 Buckets]
@@ -18,7 +19,7 @@
 (defn list
   "List bucket (truncated)"
   [client project-id & [next-page-token]]
-  (let [^Storage$Buckets$List request (.list (.buckets client) project)
+  (let [^Storage$Buckets$List request (.list (.buckets client) project-id)
         ^Storage$Buckets$List request (if (some? next-page-token)
                                           (.setPageToken request next-page-token)
                                           request)
@@ -33,11 +34,11 @@
   [client project-id]
   (lazy-seq
     (loop [buckets-list []
-           response (clj-gcloud.storage.bucket/list client project)]
+           response (clj-gcloud.storage.bucket/list client project-id)]
            (if (some? (:next-page-token response))
               (recur
                 (into [] (concat buckets-list (:items response)))
-                (clj-gcloud.storage.bucket/list client project (:next-page-token response)))
+                (clj-gcloud.storage.bucket/list client project-id (:next-page-token response)))
               (into [] (concat buckets-list (:items response)))))))
 
 (defn create-bucket
@@ -53,7 +54,7 @@
                           (.setStorageClass (:storage-class bucket-specs)))]
         (.execute (.insert (.buckets client) project-id bucket))))
 
-(def describe-bucket
+(defn describe-bucket
   "Retrieve bucket info"
   [client bucket-name]
   (json/parse-string
@@ -63,7 +64,7 @@
         bucket-name))
     true))
 
-(def delete-bucket
+(defn delete-bucket
   "Delete a bucket"
   [client bucket-name]
   (json/parse-string
