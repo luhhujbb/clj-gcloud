@@ -1,6 +1,6 @@
 (defproject luhhujbb/clj-gcloud "1.0.0"
   :description "clojure lib to interact with gcp"
-  :url "https://github.com/luhhujbb/clj-gcloud-compute"
+  :url "https://github.com/luhhujbb/clj-gcloud"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.10.1"]
