@@ -27,28 +27,37 @@
 ;;objects
 (defn put-file
  [client bucket key file-path & [opts]]
- (.execute
+ (json/parse-string (.toString
+   (.execute
    (.insert
      (.objects client)
      bucket
-     (mk-storage-object bucket client))
-     (FileContent. (:content-type opts) (io/file file-path))))
+     (mk-storage-object bucket key)
+     (FileContent. (:content-type opts) (io/file file-path))))) true))
 
 (defn put-bytes
   [client bucket key content-bytes & [opts]]
-  (.execute
+  (json/parse-string (.toString
+    (.execute
     (.insert
       (.objects client)
       bucket
-      (mk-storage-object bucket client))
-      (ByteArrayContent. (:content-type opts) content-bytes)))
+      (mk-storage-object bucket key)
+      (ByteArrayContent. (:content-type opts) content-bytes)))) true))
 
 (defn put-string
   [client bucket key content-string & [opts]]
-  (put-bytes bucket key (.getBytes content-string) opts))
+  (put-bytes client bucket key (.getBytes content-string) opts))
 
 (defn put
- [client bucket key input-stream & [metadata]])
+ [client bucket key input-stream & [opts]]
+ (json/parse-string (.toString
+   (.execute
+   (.insert
+     (.objects client)
+     bucket
+     (mk-storage-object bucket key)
+     (InputStreamContent. (:content-type opts) input-stream)))) true))
 
 (defn list
  "List object (truncated)"
@@ -75,7 +84,7 @@
  (let [args* (if (some? args) args {})]
    (lazy-seq
      (loop [buckets-list []
-          response (clj-gcloud.storage.object/list client bucket)]
+          response (clj-gcloud.storage.object/list client bucket args*)]
           (if (some? (:next-page-token response))
              (recur
                (into [] (concat buckets-list (:items response)))
@@ -106,6 +115,6 @@
  (let [fos (new java.io.FileOutputStream file-path)]
     (.executeMediaAndDownloadTo (.get (.objects client) bucket key) fos)))
 
-(defn delete-object
+(defn delete
  [client bucket key]
  (.execute (.delete (.objects client) bucket key)))

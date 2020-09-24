@@ -41,7 +41,7 @@
                 (clj-gcloud.storage.bucket/list client project-id (:next-page-token response)))
               (into [] (concat buckets-list (:items response)))))))
 
-(defn create-bucket
+(defn create
   "Bucket specs contains at least:
   * name
   * location (region, multiregional)
@@ -52,24 +52,25 @@
                           (.setName (:name bucket-specs))
                           (.setLocation (:location bucket-specs))
                           (.setStorageClass (:storage-class bucket-specs)))]
-        (.execute (.insert (.buckets client) project-id bucket))))
+        (json/parse-string
+          (.toString
+            (.execute (.insert (.buckets client) project-id bucket)))
+          true)))
 
-(defn describe-bucket
+(defn describe
   "Retrieve bucket info"
   [client bucket-name]
   (json/parse-string
-    (.execute
+    (.toString (.execute
       (.get
         (.buckets client)
-        bucket-name))
+        bucket-name)))
     true))
 
-(defn delete-bucket
+(defn delete
   "Delete a bucket"
   [client bucket-name]
-  (json/parse-string
     (.execute
       (.delete
         (.buckets client)
-        bucket-name))
-    true))
+        bucket-name)))
