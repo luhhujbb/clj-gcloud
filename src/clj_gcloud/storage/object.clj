@@ -118,3 +118,10 @@
 (defn delete
  [client bucket key]
  (.execute (.delete (.objects client) bucket key)))
+
+(defn copy
+ [client bucket key dst-bucket dst-key]
+ (.execute (.copy (.objects client)
+              bucket key
+              dst-bucket dst-key
+              (mk-storage-object bucket key))))
