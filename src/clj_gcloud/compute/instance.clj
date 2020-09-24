@@ -1,8 +1,10 @@
 (ns clj-gcloud.compute.instance
   (:require [clojure.tools.logging :as log]
-            [cheshire.core :as json])
+            [cheshire.core :as json]
+            [clj-gcloud.common.core :as common])
     (:import [com.google.api.services.compute
                 Compute
+                Compute$Builder
                 Compute$Instances
                 Compute$Instances$List
                 Compute$Instances$Get]
@@ -12,14 +14,25 @@
                 InstancesSetLabelsRequest]
              [java.util Arrays Map]))
 
+ (defn ^Compute init
+   [options]
+     ^Compute
+     (common/build-service
+      Compute$Builder
+      (if-not (:scope options)
+       (assoc options :scope ["https://www.googleapis.com/auth/cloud-platform"])
+       options)))
+
 (defn list
-    [^Compute client project zone & [next-page-token]]
+    [^Compute client project zone & [args]]
     (let [^Compute$Instances$List request (.list (.instances client) project zone)
-          ^Compute$Instances$List request (if (some? next-page-token)
-                                            (.setPageToken request next-page-token)
+          ^Compute$Instances$List request (if (some? (:next-page-token args))
+                                            (.setPageToken request (:next-page-token args))
                                             request)
           ^InstanceList response (.execute request)]
-          {:items (json/parse-string (.toString (.getItems response)) true)
+          {:items (if-let [items (.getItems response)]
+                     (json/parse-string (.toString items) true)
+                     [])
            :next-page-token (.getNextPageToken response)}))
 
 (defn list-all
@@ -30,7 +43,7 @@
              (if (some? (:next-page-token response))
                 (recur
                   (into [] (concat instances-list (:items response)))
-                  (list client project zone (:next-page-token response)))
+                  (list client project zone {:next-page-token (:next-page-token response)}))
                 (into [] (concat instances-list (:items response)))))))
 
 (defn get
